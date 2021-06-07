@@ -9,12 +9,16 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-import os
+import os, sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Check import package path
+# print(sys.path)
+# Append import package path point to apps package
+sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -37,6 +41,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 'meiduo_mall.apps.users',   #user module
+    'users',   # user module
+    'contents',   # Home advertisement page module
+    'verifications',   # Image verify code
 ]
 
 MIDDLEWARE = [
@@ -107,21 +115,21 @@ DATABASES = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://192.168.126.129:6379/0",
+        "LOCATION": "redis://127.0.0.1:6379/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
     "session": {  # session
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://192.168.126.129:6379/1",
+        "LOCATION": "redis://127.0.0.1:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
     "verify_code": {  # verify code
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://192.168.126.129:6379/2",
+        "LOCATION": "redis://127.0.0.1:6379/2",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
@@ -129,6 +137,7 @@ CACHES = {
 }
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "session"
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -166,7 +175,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
+# Specify url prefix of loading static file
 STATIC_URL = '/static/'
+# Configure the static file load path
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -214,3 +226,12 @@ LOGGING = {
         },
     }
 }
+
+# Specify custom user model class: syntax of value --> child_app_name.model_class
+AUTH_USER_MODEL = 'users.User'
+
+# Specify custom user authorization backend
+AUTHENTICATION_BACKENDS = ['users.utils.UsernameMobileBackend']
+
+# After determining whether the user is logged in, specify the redirect address for the unlogged user
+LOGIN_URL = '/login/'
